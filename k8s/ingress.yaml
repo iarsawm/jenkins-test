@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: arsam-ingress
+  name: arsam-app-ingress
   namespace: arsam-app
 spec:
   ingressClassName: nginx
