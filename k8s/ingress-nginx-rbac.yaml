@@ -3,12 +3,15 @@ kind: ClusterRole
 metadata:
   name: ingress-nginx
 rules:
+  # Core resources
   - apiGroups: [""]
-    resources: ["configmaps", "pods", "secrets", "endpoints", "namespaces"]
+    resources: ["configmaps", "pods", "secrets", "endpoints", "namespaces", "services"]
     verbs: ["get", "list", "watch"]
+  # Ingress resources
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
     verbs: ["get", "list", "watch"]
+  # Coordination resources for leader election
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
     verbs: ["get", "list", "watch", "create", "update", "patch"]
