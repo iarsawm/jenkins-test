@@ -16,15 +16,16 @@ spec:
       containers:
         - name: spring-backend
           image: backend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           resources:
-            requests:
-              cpu: "100m"
-              memory: "256Mi"
             limits:
-              cpu: "250m"
+              cpu: "500m"
               memory: "512Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -32,9 +33,11 @@ metadata:
   name: spring-backend
   namespace: arsam-app
 spec:
+  type: ClusterIP
   selector:
     app: spring-backend
   ports:
-    - port: 8080
+    - protocol: TCP
+      port: 8080
       targetPort: 8080
-  type: ClusterIP
+

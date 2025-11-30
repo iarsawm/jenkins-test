@@ -16,14 +16,15 @@ spec:
       containers:
         - name: angular-frontend
           image: frontend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
           resources:
-            requests:
-              cpu: "50m"
-              memory: "128Mi"
             limits:
-              cpu: "150m"
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "250m"
               memory: "256Mi"
 ---
 apiVersion: v1
@@ -32,9 +33,10 @@ metadata:
   name: angular-frontend
   namespace: arsam-app
 spec:
+  type: ClusterIP
   selector:
     app: angular-frontend
   ports:
-    - port: 80
+    - protocol: TCP
+      port: 80
       targetPort: 80
-  type: ClusterIP
