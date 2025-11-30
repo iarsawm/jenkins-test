@@ -1,71 +1,19 @@
-apiVersion: v1
-kind: Namespace
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: ingress-nginx
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: ingress-nginx
-  namespace: ingress-nginx
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ingress-nginx-controller
-  namespace: ingress-nginx
+  name: project-ingress
+  namespace: project
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
 spec:
-  type: NodePort
-  selector:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/component: controller
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-    - name: https
-      port: 443
-      targetPort: 443
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ingress-nginx-controller
-  namespace: ingress-nginx
-  labels:
-    app.kubernetes.io/name: ingress-nginx
-    app.kubernetes.io/component: controller
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: ingress-nginx
-      app.kubernetes.io/component: controller
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: ingress-nginx
-        app.kubernetes.io/component: controller
-    spec:
-      serviceAccountName: ingress-nginx
-      containers:
-        - name: controller
-          image: registry.cn-hangzhou.aliyuncs.com/google_containers/nginx-ingress-controller:v1.13.2
-          args:
-            - /nginx-ingress-controller
-            - --election-id=ingress-nginx-leader
-            - --controller-class=k8s.io/ingress-nginx
-            - --watch-ingress-without-class=true
-            - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
-            - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
-            - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
-          ports:
-            - containerPort: 80
-            - containerPort: 443
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 250m
-              memory: 256Mi
+  rules:
+    - host: arsam.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
