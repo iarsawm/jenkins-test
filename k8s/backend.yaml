@@ -18,18 +18,12 @@ spec:
           image: backend:latest
           ports:
             - containerPort: 8080
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
           resources:
             requests:
-              cpu: "50m"
+              cpu: "100m"
               memory: "256Mi"
             limits:
-              cpu: "200m"
+              cpu: "250m"
               memory: "512Mi"
 ---
 apiVersion: v1
@@ -43,3 +37,4 @@ spec:
   ports:
     - port: 8080
       targetPort: 8080
+  type: ClusterIP

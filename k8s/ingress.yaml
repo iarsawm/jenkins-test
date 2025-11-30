@@ -1,11 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: project-ingress
-  namespace: project
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
+  name: arsam-ingress
+  namespace: arsam-app
 spec:
+  ingressClassName: nginx
   rules:
     - host: arsam.example.com
       http:
@@ -14,6 +13,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: angular-frontend
                 port:
                   number: 80
