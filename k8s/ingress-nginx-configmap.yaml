@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-controller
+  namespace: arsam-app
+data:
+  enable-vts-status: "false"   # minimal required config

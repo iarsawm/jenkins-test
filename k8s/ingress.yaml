@@ -3,8 +3,9 @@ kind: Ingress
 metadata:
   name: arsam-app-ingress
   namespace: arsam-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  ingressClassName: nginx
   rules:
     - host: arsam.example.com
       http:
@@ -16,3 +17,10 @@ spec:
                 name: angular-frontend
                 port:
                   number: 80
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: spring-backend
+                port:
+                  number: 8080
