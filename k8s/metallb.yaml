@@ -1,0 +1,8 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: ingress-nginx-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 172.22.230.240-172.22.230.250
