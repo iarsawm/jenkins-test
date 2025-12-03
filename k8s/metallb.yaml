@@ -1,8 +1,103 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metallb-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: metallb-system
+  name: metallb
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: metallb-system
+rules:
+  - apiGroups: [""]
+    resources: ["services", "endpoints", "pods", "nodes", "configmaps"]
+    verbs: ["get", "list", "watch", "update", "create", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metallb-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metallb-system
+subjects:
+  - kind: ServiceAccount
+    name: metallb
+    namespace: metallb-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: metallb-system
+  name: controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metallb
+      component: controller
+  template:
+    metadata:
+      labels:
+        app: metallb
+        component: controller
+    spec:
+      serviceAccountName: metallb
+      containers:
+        - name: controller
+          image: metallb/controller:v0.14.13
+          args:
+            - --config=metallb-config
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  namespace: metallb-system
+  name: speaker
+spec:
+  selector:
+    matchLabels:
+      app: metallb
+      component: speaker
+  template:
+    metadata:
+      labels:
+        app: metallb
+        component: speaker
+    spec:
+      hostNetwork: true
+      serviceAccountName: metallb
+      containers:
+        - name: speaker
+          image: metallb/speaker:v0.14.13
+          args:
+            - --config=metallb-config
+---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   name: ingress-nginx-pool
   namespace: metallb-system
+  annotations:
+    metallb.universe.tf/disable-validation: "true"  # temporary if webhook still fails
 spec:
   addresses:
-  - 172.22.230.240-172.22.230.250
+    - 192.168.176.201-192.168.176.210  # range of IPs on your local LAN for LoadBalancers
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: ingress-nginx-adv
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - ingress-nginx-pool
