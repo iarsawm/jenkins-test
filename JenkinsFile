@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    environment {
+        BACKEND_IMAGE = "iarsawm/spring-boot-backend:latest"
+        FRONTEND_IMAGE = "iarsawm/angular-frontend:latest"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/iarsawm/jenkins-test.git', branch: 'main'
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                dir('spring-boot-server') {
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('angular-17-client') {
+                    sh 'npm ci --silent'
+                    sh 'npm run build -- --configuration=production'
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
+                        sh "docker build -t ${BACKEND_IMAGE} spring-boot-server"
+                        sh "docker build -t ${FRONTEND_IMAGE} angular-17-client"
+                        sh "docker push ${BACKEND_IMAGE}"
+                        sh "docker push ${FRONTEND_IMAGE}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f k8s/'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs!'
+        }
+    }
+}
+

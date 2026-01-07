@@ -1,42 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: angular-frontend
-  namespace: arsam-app
+  name: frontend-deployment
+  labels:
+    app: frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: angular-frontend
+      app: frontend
   template:
     metadata:
       labels:
-        app: angular-frontend
+        app: frontend
     spec:
       containers:
-        - name: angular-frontend
-          image: frontend:latest
-          imagePullPolicy: IfNotPresent
+        - name: frontend
+          image: iarsawm/angular-frontend:latest
           ports:
             - containerPort: 80
-          resources:
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-            requests:
-              cpu: "250m"
-              memory: "256Mi"
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: angular-frontend
-  namespace: arsam-app
+  name: frontend-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
-    app: angular-frontend
+    app: frontend
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
+      nodePort: 30000  # choose a port in 30000-32767
+
