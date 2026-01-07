@@ -9,7 +9,10 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/iarsawm/jenkins-test.git', branch: 'main'
+                // Using SSH with credentials
+                git branch: 'main', 
+                    credentialsId: 'GitHub SSH Key', 
+                    url: 'git@github.com:iarsawm/jenkins-test.git'
             }
         }
 
